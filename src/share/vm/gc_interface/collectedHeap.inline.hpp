@@ -122,7 +122,7 @@ HeapWord* CollectedHeap::common_mem_allocate_noinit(KlassHandle klass, size_t si
   }
 
   HeapWord* result = NULL;
-  if (UseTLAB) {
+  if (UseTLAB) { // 使用线程本地分配缓冲区进行内存分配
     result = allocate_from_tlab(klass, THREAD, size);
     if (result != NULL) {
       assert(!HAS_PENDING_EXCEPTION,
@@ -132,7 +132,7 @@ HeapWord* CollectedHeap::common_mem_allocate_noinit(KlassHandle klass, size_t si
   }
   bool gc_overhead_limit_was_exceeded = false;
   result = Universe::heap()->mem_allocate(size,
-                                          &gc_overhead_limit_was_exceeded);
+                                          &gc_overhead_limit_was_exceeded); // 否则直接从堆上分配，多线程竞争同步分配？
   if (result != NULL) {
     NOT_PRODUCT(Universe::heap()->
       check_for_non_bad_heap_word_value(result, size));
@@ -146,7 +146,7 @@ HeapWord* CollectedHeap::common_mem_allocate_noinit(KlassHandle klass, size_t si
   }
 
 
-  if (!gc_overhead_limit_was_exceeded) {
+  if (!gc_overhead_limit_was_exceeded) { // 堆内存不足
     // -XX:+HeapDumpOnOutOfMemoryError and -XX:OnOutOfMemoryError support
     report_java_out_of_memory("Java heap space");
 
@@ -157,7 +157,7 @@ HeapWord* CollectedHeap::common_mem_allocate_noinit(KlassHandle klass, size_t si
     }
 
     THROW_OOP_0(Universe::out_of_memory_error_java_heap());
-  } else {
+  } else { // GC开销超出限制
     // -XX:+HeapDumpOnOutOfMemoryError and -XX:OnOutOfMemoryError support
     report_java_out_of_memory("GC overhead limit exceeded");
 
@@ -177,9 +177,12 @@ HeapWord* CollectedHeap::common_mem_allocate_init(KlassHandle klass, size_t size
   return obj;
 }
 
+/**
+ * 使用线程本地分配缓冲区进行内存分配
+ */
 HeapWord* CollectedHeap::allocate_from_tlab(KlassHandle klass, Thread* thread, size_t size) {
   assert(UseTLAB, "should use UseTLAB");
-
+  // 从线程本地分配缓冲区分配size个字节的内存？
   HeapWord* obj = thread->tlab().allocate(size);
   if (obj != NULL) {
     return obj;

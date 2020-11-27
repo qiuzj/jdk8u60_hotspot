@@ -39,10 +39,10 @@ class GlobalTLABStats;
 class ThreadLocalAllocBuffer: public CHeapObj<mtThread> {
   friend class VMStructs;
 private:
-  HeapWord* _start;                              // address of TLAB
-  HeapWord* _top;                                // address after last allocation
-  HeapWord* _pf_top;                             // allocation prefetch watermark
-  HeapWord* _end;                                // allocation end (excluding alignment_reserve)
+  HeapWord* _start;                              // address of TLAB. TLAB内存块的地址
+  HeapWord* _top;                                // address after last allocation. TLAB最后一个已分配位置的下一个地址
+  HeapWord* _pf_top;                             // allocation prefetch watermark. 预分配内存的水位
+  HeapWord* _end;                                // allocation end (excluding alignment_reserve). TLAB内存块的尾部地址，可分配对象内存的上限，不包括对齐保留部分
   size_t    _desired_size;                       // desired size   (including alignment_reserve)
   size_t    _refill_waste_limit;                 // hold onto tlab if free() is larger than this
   size_t    _allocated_before_last_gc;           // total bytes allocated up until the last gc
@@ -72,7 +72,7 @@ private:
 
   static int    target_refills()                 { return _target_refills; }
   size_t initial_desired_size();
-
+  // 空闲大小. 可用于分配对象的空闲内存 + 对齐保留大小
   size_t remaining() const                       { return end() == NULL ? 0 : pointer_delta(hard_end(), top()); }
 
   // Make parsable and release it.
@@ -111,6 +111,7 @@ public:
 
   HeapWord* start() const                        { return _start; }
   HeapWord* end() const                          { return _end; }
+  // TLAB的实际结尾. 即_end+对齐保留大小
   HeapWord* hard_end() const                     { return _end + alignment_reserve(); }
   HeapWord* top() const                          { return _top; }
   HeapWord* pf_top() const                       { return _pf_top; }
@@ -129,7 +130,9 @@ public:
     int reserve_size = typeArrayOopDesc::header_size(T_INT);
     return MAX2(reserve_size, VM_Version::reserve_for_allocation_prefetch());
   }
+  // TLAB顶部的对齐保留的内存大小（HeapWord数）
   static size_t alignment_reserve()              { return align_object_size(end_reserve()); }
+  // TLAB顶部的对齐保留的内存大小（字节数）
   static size_t alignment_reserve_in_bytes()     { return alignment_reserve() * HeapWordSize; }
 
   // Return tlab size or remaining space in eden such that the
@@ -146,7 +149,7 @@ public:
   // Make an in-use tlab parsable, optionally also retiring it.
   void make_parsable(bool retire);
 
-  // Retire in-use tlab before allocation of a new tlab
+  // Retire in-use tlab before allocation of a new tlab. 在分配一个新的TLAB之前，回收使用中的TLAB
   void clear_before_allocation();
 
   // Accumulate statistics across all tlabs before gc

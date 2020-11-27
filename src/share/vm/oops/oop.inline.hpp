@@ -155,10 +155,11 @@ inline bool oopDesc::is_instanceRef()         const { return klass()->oop_is_ins
 inline bool oopDesc::is_array()               const { return klass()->oop_is_array(); }
 inline bool oopDesc::is_objArray()            const { return klass()->oop_is_objArray(); }
 inline bool oopDesc::is_typeArray()           const { return klass()->oop_is_typeArray(); }
-
+// 根据偏移量获取字段的数据？
 inline void*     oopDesc::field_base(int offset)        const { return (void*)&((char*)this)[offset]; }
 
 template <class T> inline T* oopDesc::obj_field_addr(int offset) const { return (T*)field_base(offset); }
+// 根据字段地址获取元数据？
 inline Metadata** oopDesc::metadata_field_addr(int offset) const { return (Metadata**)field_base(offset); }
 inline jbyte*    oopDesc::byte_field_addr(int offset)   const { return (jbyte*)   field_base(offset); }
 inline jchar*    oopDesc::char_field_addr(int offset)   const { return (jchar*)   field_base(offset); }
@@ -315,7 +316,7 @@ inline void oopDesc::obj_field_put(int offset, oop value) {
   UseCompressedOops ? oop_store(obj_field_addr<narrowOop>(offset), value) :
                       oop_store(obj_field_addr<oop>(offset),       value);
 }
-
+// 根据klass的偏移量，获取Klass
 inline Metadata* oopDesc::metadata_field(int offset) const {
   return *metadata_field_addr(offset);
 }

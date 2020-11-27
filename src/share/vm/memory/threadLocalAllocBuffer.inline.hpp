@@ -31,6 +31,7 @@
 #include "runtime/thread.hpp"
 #include "utilities/copy.hpp"
 
+// 从线程本地分配缓冲区中分配大小为size字节的内存
 inline HeapWord* ThreadLocalAllocBuffer::allocate(size_t size) {
   invariants();
   HeapWord* obj = top();

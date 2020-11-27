@@ -93,6 +93,9 @@ class Ticks;
 // is preloaded, optional, release-specific, etc.
 // The order of these definitions is significant; it is the order in which
 // preloading is actually performed by initialize_preloaded_classes.
+// 每个知名的类都有一个简短的klass名称（例如object_klass），一个vmSymbol名称（例如java_lang_Object）和一个标记字，
+// 标志字之间有一些细微的区别，例如klass是否已预加载、可选的或特定于发行版等。
+// 这些定义的顺序很重要。这是由initialize_preloaded_classes实际执行预加载的顺序。
 
 #define WK_KLASSES_DO(do_klass)                                                                                          \
   /* well-known classes */                                                                                               \

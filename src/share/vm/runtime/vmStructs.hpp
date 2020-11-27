@@ -96,7 +96,7 @@ typedef struct {
 } VMLongConstantEntry;
 
 // This class is a friend of most classes, to be able to access
-// private fields
+// private fields. 这个类是大多数类的朋友，可以访问私有字段
 class VMStructs {
 public:
   // The last entry is identified over in the serviceability agent by

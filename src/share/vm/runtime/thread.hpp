@@ -255,7 +255,7 @@ class Thread: public ThreadShadow {
   friend class ThreadLocalStorage;
   friend class GC_locker;
 
-  ThreadLocalAllocBuffer _tlab;                 // Thread-local eden
+  ThreadLocalAllocBuffer _tlab;                 // Thread-local eden. 线程私有的本地分配缓冲区，每个线程对应一个
   jlong _allocated_bytes;                       // Cumulative number of bytes allocated on
                                                 // the Java heap
 
@@ -410,7 +410,7 @@ class Thread: public ThreadShadow {
   // Installs a pending exception to be inserted later
   static void send_async_exception(oop thread_oop, oop java_throwable);
 
-  // Resource area
+  // Resource area. 线程本地资源区域，用于在VM中进行临时分配.
   ResourceArea* resource_area() const            { return _resource_area; }
   void set_resource_area(ResourceArea* area)     { _resource_area = area; }
 
@@ -528,9 +528,11 @@ public:
 
 protected:
   // OS data associated with the thread
-  OSThread* _osthread;  // Platform-specific thread information
+  // 与线程关联的操作系统数据
+  OSThread* _osthread;  // Platform-specific thread information. 特定于平台的线程信息
 
   // Thread local resource area for temporary allocation within the VM
+  // 线程本地资源区域，用于在VM中进行临时分配.
   ResourceArea* _resource_area;
 
   DEBUG_ONLY(ResourceMark* _current_resource_mark;)

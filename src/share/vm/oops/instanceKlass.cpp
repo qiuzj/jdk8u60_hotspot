@@ -1097,7 +1097,7 @@ objArrayOop InstanceKlass::allocate_objArray(int n, int length, TRAPS) {
     JvmtiExport::post_array_size_exhausted();
     THROW_OOP_0(Universe::out_of_memory_error_array_size());
   }
-  int size = objArrayOopDesc::object_size(length);
+  int size = objArrayOopDesc::object_size(length); // 对象大小
   Klass* ak = array_klass(n, CHECK_NULL);
   KlassHandle h_ak (THREAD, ak);
   objArrayOop o =

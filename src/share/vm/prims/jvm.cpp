@@ -1980,6 +1980,9 @@ static bool select_method(methodHandle method, bool want_constructor) {
   }
 }
 
+/**
+ * JVM_GetClassDeclaredMethods方法的实际实现类.
+ */
 static jobjectArray get_class_declared_methods_helper(
                                   JNIEnv *env,
                                   jclass ofClass, jboolean publicOnly,
@@ -1988,73 +1991,89 @@ static jobjectArray get_class_declared_methods_helper(
 
   JvmtiVMObjectAllocEventCollector oam;
 
-  // Exclude primitive types and array types
+  // Exclude primitive types and array types. 排除基本类型和数组类型，返回一个空数组.
   if (java_lang_Class::is_primitive(JNIHandles::resolve_non_null(ofClass))
       || java_lang_Class::as_Klass(JNIHandles::resolve_non_null(ofClass))->oop_is_array()) {
     // Return empty array
     oop res = oopFactory::new_objArray(klass, 0, CHECK_NULL);
     return (jobjectArray) JNIHandles::make_local(env, res);
   }
-
+  // 先将ofClass强转为oop，再根据klass的偏移量获取并转化为Klass
   instanceKlassHandle k(THREAD, java_lang_Class::as_Klass(JNIHandles::resolve_non_null(ofClass)));
 
-  // Ensure class is linked
+  // Ensure class is linked. 确保类已被链接，方法的实现：share\vm\oops\instanceKlass.cpp
   k->link_class(CHECK_NULL);
 
-  Array<Method*>* methods = k->methods();
-  int methods_length = methods->length();
+  // 获取类的方法列表
+  Array<Method*>* methods = k->methods(); // 方法的实现：share\vm\oops\instanceKlass.hpp
+  int methods_length = methods->length(); // 方法数量
 
   // Save original method_idnum in case of redefinition, which can change
   // the idnum of obsolete methods.  The new method will have the same idnum
   // but if we refresh the methods array, the counts will be wrong.
+  // 保存原始方法的idnum以便用于重新定义，这样就可以更改已废弃方法的idnum。
+  // 新方法将拥有相同的idnum，但是如果我们刷新了methods数组，则计数将是错误的。
   ResourceMark rm(THREAD);
   GrowableArray<int>* idnums = new GrowableArray<int>(methods_length);
-  int num_methods = 0;
+  int num_methods = 0; // 过滤后符合条件/被选择的方法数量
 
+  // 遍历所有方法，过滤出符合条件的方法
   for (int i = 0; i < methods_length; i++) {
+    // class methodHandle在\src\share\vm\utilities\globalDefinitions.hpp中声明，但是具体调用的实现方法在哪里呢？
     methodHandle method(THREAD, methods->at(i));
     if (select_method(method, want_constructor)) {
+      // 1）不限定只过滤出public 2）如果限定了，那么必须为public方法
       if (!publicOnly || method->is_public()) {
-        idnums->push(method->method_idnum());
-        ++num_methods;
+        idnums->push(method->method_idnum()); // 符合条件的方法idnum添加到idnums数组
+        ++num_methods; // 符合条件的方法数量
       }
     }
   }
 
   // Allocate result
   objArrayOop r = oopFactory::new_objArray(klass, num_methods, CHECK_NULL);
-  objArrayHandle result (THREAD, r);
+  objArrayHandle result (THREAD, r); // 结果result
 
   // Now just put the methods that we selected above, but go by their idnum
   // in case of redefinition.  The methods can be redefined at any safepoint,
   // so above when allocating the oop array and below when creating reflect
   // objects.
+  // 现在只需添加我们在上面选择的方法，但是在重新定义时使用它们的idnum。
+  // 方法可以在任何安全点进行重新定义，因此在分配oop数组时高于安全点，在创建反射对象时低于安全点。（高和低怎么理解？）
   for (int i = 0; i < num_methods; i++) {
-    methodHandle method(THREAD, k->method_with_idnum(idnums->at(i)));
+    methodHandle method(THREAD, k->method_with_idnum(idnums->at(i))); // 根据idnum获取方法
     if (method.is_null()) {
       // Method may have been deleted and seems this API can handle null
       // Otherwise should probably put a method that throws NSME
+      // 方法可能已被删除，并且该API似乎可以处理null值。否则应该使用一个抛出NSME的方法。
       result->obj_at_put(i, NULL);
     } else {
       oop m;
-      if (want_constructor) {
+      if (want_constructor) { // 使用构造器？
         m = Reflection::new_constructor(method, CHECK_NULL);
-      } else {
+      } else { // 不使用构造器？
         m = Reflection::new_method(method, UseNewReflection, false, CHECK_NULL);
       }
-      result->obj_at_put(i, m);
+      result->obj_at_put(i, m); // 存入符合条件的方法
     }
   }
 
   return (jobjectArray) JNIHandles::make_local(env, result());
 }
 
+/**
+ * 反射获取Java类声明的方法列表
+ * 
+ * @param env JNI接口指针
+ * @param ofClass 获取目标反射方法所属类的Class对象
+ * @param publicOnly 是否只获取public类型的方法. 如果为true，只获取当前及父类的所有public方法；否只获取当前类的所有方法.
+ */
 JVM_ENTRY(jobjectArray, JVM_GetClassDeclaredMethods(JNIEnv *env, jclass ofClass, jboolean publicOnly))
 {
   JVMWrapper("JVM_GetClassDeclaredMethods");
   return get_class_declared_methods_helper(env, ofClass, publicOnly,
-                                           /*want_constructor*/ false,
-                                           SystemDictionary::reflect_Method_klass(), THREAD);
+                                           /*want_constructor*/ false, // what?
+                                           SystemDictionary::reflect_Method_klass(), THREAD); // THREAD是指向当前线程的指针吧，具体在哪里初始化？
 }
 JVM_END
 

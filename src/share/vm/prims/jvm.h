@@ -548,9 +548,11 @@ JNIEXPORT jbyteArray JNICALL
 JVM_GetMethodTypeAnnotations(JNIEnv *env, jobject method);
 
 /*
- * New (JDK 1.4) reflection implementation
+ * New (JDK 1.4) reflection implementation. 反射方法定义
  */
-
+/**
+ * 反射获取Java类声明的方法列表
+ */
 JNIEXPORT jobjectArray JNICALL
 JVM_GetClassDeclaredMethods(JNIEnv *env, jclass ofClass, jboolean publicOnly);
 

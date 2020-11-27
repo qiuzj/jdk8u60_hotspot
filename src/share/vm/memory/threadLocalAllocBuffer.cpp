@@ -169,10 +169,11 @@ void ThreadLocalAllocBuffer::initialize_statistics() {
     _slow_allocations  = 0;
 }
 
-void ThreadLocalAllocBuffer::fill(HeapWord* start,
-                                  HeapWord* top,
-                                  size_t    new_size) {
-  _number_of_refills++;
+// 填充TLAB
+void ThreadLocalAllocBuffer::fill(HeapWord* start, // TLAB的起始地址
+                                  HeapWord* top, // TLAB最后一个分配位置的下一个地址
+                                  size_t    new_size) { // 新的TLAB的容量
+  _number_of_refills++; // 重新进行TLAB分配的次数？
   if (PrintTLAB && Verbose) {
     print_stats("fill");
   }
@@ -190,7 +191,7 @@ void ThreadLocalAllocBuffer::initialize(HeapWord* start,
   set_top(top);
   set_pf_top(top);
   set_end(end);
-  invariants();
+  invariants(); // 确保上面的几个位置之间不越界
 }
 
 void ThreadLocalAllocBuffer::initialize() {

@@ -363,7 +363,7 @@ class Chunk: CHeapObj<mtChunk> {
 };
 
 //------------------------------Arena------------------------------------------
-// Fast allocation of memory
+// Fast allocation of memory. 快速内存分配
 class Arena : public CHeapObj<mtNone> {
 protected:
   friend class ResourceMark;
@@ -371,14 +371,14 @@ protected:
   friend class NoHandleMark;
   friend class VMStructs;
 
-  MEMFLAGS    _flags;           // Memory tracking flags
+  MEMFLAGS    _flags;           // Memory tracking flags. 内存跟踪标志
 
-  Chunk *_first;                // First chunk
-  Chunk *_chunk;                // current chunk
-  char *_hwm, *_max;            // High water mark and max in current chunk
-  // Get a new Chunk of at least size x
+  Chunk *_first;                // First chunk. 第1个块
+  Chunk *_chunk;                // current chunk. 当前块
+  char *_hwm, *_max;            // High water mark and max in current chunk. _hwm：高水位，_max：当前块的最大水位
+  // Get a new Chunk of at least size x. 获取一个新的块，其大小至少为x
   void* grow(size_t x, AllocFailType alloc_failmode = AllocFailStrategy::EXIT_OOM);
-  size_t _size_in_bytes;        // Size of arena (used for native memory tracking)
+  size_t _size_in_bytes;        // Size of arena (used for native memory tracking). arena的大小（用于本地内存跟踪）
 
   NOT_PRODUCT(static julong _bytes_allocated;) // total #bytes allocated since start
   friend class AllocStats;

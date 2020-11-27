@@ -261,6 +261,9 @@ void CollectedHeap::check_for_valid_allocation_state() {
 }
 #endif
 
+/**
+ * 从TLAB分配内存的慢速版本。因为需要先申请新的TLAB内存块，再从TLAB划分一块给对象使用。
+ */
 HeapWord* CollectedHeap::allocate_from_tlab_slow(KlassHandle klass, Thread* thread, size_t size) {
 
   // Retain tlab and allocate object in shared space if
@@ -270,8 +273,8 @@ HeapWord* CollectedHeap::allocate_from_tlab_slow(KlassHandle klass, Thread* thre
     return NULL;
   }
 
-  // Discard tlab and allocate a new one.
-  // To minimize fragmentation, the last TLAB may be smaller than the rest.
+  // Discard tlab and allocate a new one. 丢弃TLAB并分配一个新的。
+  // To minimize fragmentation, the last TLAB may be smaller than the rest. 为了最小化碎片，最后一个TLAB可能比其他的要小。
   size_t new_tlab_size = thread->tlab().compute_size(size);
 
   thread->tlab().clear_before_allocation();
@@ -280,7 +283,7 @@ HeapWord* CollectedHeap::allocate_from_tlab_slow(KlassHandle klass, Thread* thre
     return NULL;
   }
 
-  // Allocate a new TLAB...
+  // Allocate a new TLAB...。分配一个新的TLAB内存块
   HeapWord* obj = Universe::heap()->allocate_new_tlab(new_tlab_size);
   if (obj == NULL) {
     return NULL;
@@ -301,7 +304,7 @@ HeapWord* CollectedHeap::allocate_from_tlab_slow(KlassHandle klass, Thread* thre
     Copy::fill_to_words(obj + hdr_size, new_tlab_size - hdr_size, badHeapWordVal);
 #endif // ASSERT
   }
-  thread->tlab().fill(obj, obj + size, new_tlab_size);
+  thread->tlab().fill(obj, obj + size, new_tlab_size); // 参数分别表示：TLAB的起始地址，TLAB最后一个分配位置的下一个地址，新的TLAB的容量
   return obj;
 }
 

@@ -41,6 +41,7 @@
 
 //------------------------------ResourceArea-----------------------------------
 // A ResourceArea is an Arena that supports safe usage of ResourceMark.
+// ResourceArea是一个支持"安全使用ResourceMark"的Arena。
 class ResourceArea: public Arena {
   friend class ResourceMark;
   friend class DeoptResourceMark;
@@ -89,7 +90,7 @@ protected:
 #endif //ASSERT
 
   void initialize(Thread *thread) {
-    _area = thread->resource_area();
+    _area = thread->resource_area(); // 线程本地资源区域，用于在VM中进行临时分配.
     _chunk = _area->_chunk;
     _hwm = _area->_hwm;
     _max= _area->_max;

@@ -79,18 +79,18 @@
 const int LogBytesPerShort   = 1;
 const int LogBytesPerInt     = 2;
 #ifdef _LP64
-const int LogBytesPerWord    = 3;
+const int LogBytesPerWord    = 3; // 每个字占多少字节？单位：2的幂次方数
 #else
 const int LogBytesPerWord    = 2;
 #endif
-const int LogBytesPerLong    = 3;
+const int LogBytesPerLong    = 3; // 每个long类型占多少个字节？单位：2的幂次方数
 
-const int BytesPerShort      = 1 << LogBytesPerShort;
-const int BytesPerInt        = 1 << LogBytesPerInt;
-const int BytesPerWord       = 1 << LogBytesPerWord;
-const int BytesPerLong       = 1 << LogBytesPerLong;
+const int BytesPerShort      = 1 << LogBytesPerShort; // 左移1位，值为2. 2个字节=16位
+const int BytesPerInt        = 1 << LogBytesPerInt; // 左移2位，值为4. 4个字节=32位
+const int BytesPerWord       = 1 << LogBytesPerWord; // 对于64位机器左移3位，值为8. 8个字节=64位
+const int BytesPerLong       = 1 << LogBytesPerLong; // 默认左移3位，值为8. 8个字节=64位
 
-const int LogBitsPerByte     = 3;
+const int LogBitsPerByte     = 3; // 2的3次方=8，即1个字节占8位
 const int LogBitsPerShort    = LogBitsPerByte + LogBytesPerShort;
 const int LogBitsPerInt      = LogBitsPerByte + LogBytesPerInt;
 const int LogBitsPerWord     = LogBitsPerByte + LogBytesPerWord;
@@ -147,6 +147,13 @@ const int SerializePageShiftCount = 3;
 //   hw += oop(hw)->foo();
 // works, where foo is a method (like size or scavenge) that returns the
 // object size.
+/**
+ * 堆字（heap-word）宽度的不透明结构，使得 HeapWord* 可以是堆中的通用指针。
+ * 我们要求对象大小以堆字为单位进行度量，以便下面的代码能够正常工作：
+ * HeapWord* hw;
+ * hw += oop(hw)->foo();
+ * 其中foo是一个返回对象大小的方法（类似于size或者scavenge）。
+ */
 class HeapWord {
   friend class VMStructs;
  private:
@@ -165,14 +172,14 @@ class MetaWord {
   char* i;
 };
 
-// HeapWordSize must be 2^LogHeapWordSize.
+// HeapWordSize must be 2^LogHeapWordSize. 一个HeapWord占用的字节数，大小必须为2的LogHeapWordSize次方
 const int HeapWordSize        = sizeof(HeapWord);
 #ifdef _LP64
-const int LogHeapWordSize     = 3;
+const int LogHeapWordSize     = 3; // _LP64
 #else
-const int LogHeapWordSize     = 2;
+const int LogHeapWordSize     = 2; // 非_LP64
 #endif
-const int HeapWordsPerLong    = BytesPerLong / HeapWordSize;
+const int HeapWordsPerLong    = BytesPerLong / HeapWordSize; // 每个long类型占几个HeapWord大小
 const int LogHeapWordsPerLong = LogBytesPerLong - LogHeapWordSize;
 
 // The larger HeapWordSize for 64bit requires larger heaps

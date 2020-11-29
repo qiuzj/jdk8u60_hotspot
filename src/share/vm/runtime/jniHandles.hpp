@@ -32,6 +32,7 @@ class JNIHandleBlock;
 
 
 // Interface for creating and resolving local/global JNI handles
+// 用于创建和解析 本地/全局JNI处理器 的接口
 
 class JNIHandles : AllStatic {
   friend class VMStructs;
@@ -41,11 +42,11 @@ class JNIHandles : AllStatic {
   static oop _deleted_handle;                         // Sentinel marking deleted handles
 
  public:
-  // Resolve handle into oop
+  // Resolve handle into oop. 检查并将传入的对象强制转换为oop类型后返回
   inline static oop resolve(jobject handle);
-  // Resolve externally provided handle into oop with some guards
+  // Resolve externally provided handle into oop with some guards. 检查并将外部已提供的handle对象强制转换为oop类型后返回？
   inline static oop resolve_external_guard(jobject handle);
-  // Resolve handle into oop, result guaranteed not to be null
+  // Resolve handle into oop, result guaranteed not to be null. 保证传入的对象不会空，并将其强制转换为oop类型后返回
   inline static oop resolve_non_null(jobject handle);
 
   // Local handles
@@ -173,7 +174,7 @@ class JNIHandleBlock : public CHeapObj<mtInternal> {
 
 
 inline oop JNIHandles::resolve(jobject handle) {
-  oop result = (handle == NULL ? (oop)NULL : *(oop*)handle);
+  oop result = (handle == NULL ? (oop)NULL : *(oop*)handle); // 将传入的对象强制转换为oop类型
   assert(result != NULL || (handle == NULL || !CheckJNICalls || is_weak_global_handle(handle)), "Invalid value read from jni handle");
   assert(result != badJNIHandle, "Pointing to zapped jni handle area");
   return result;

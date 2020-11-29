@@ -118,9 +118,10 @@ inline jint invocation_key_to_method_slot(jint key) {
   return key;
 }
 
+// p的地址加上field_offset偏移量
 inline void* index_oop_from_field_offset_long(oop p, jlong field_offset) {
-  jlong byte_offset = field_offset_to_byte_offset(field_offset);
-#ifdef ASSERT
+  jlong byte_offset = field_offset_to_byte_offset(field_offset); // 直接返回field_offset
+#ifdef ASSERT // 执行检查逻辑
   if (p != NULL) {
     assert(byte_offset >= 0 && byte_offset <= (jlong)MAX_OBJECT_SIZE, "sane offset");
     if (byte_offset == (jint)byte_offset) {
@@ -1212,15 +1213,18 @@ UNSAFE_END
 
 // JSR166 ------------------------------------------------------------------
 
+/**
+ * Unsafe的compareAndSwapObject方法实现.
+ */
 UNSAFE_ENTRY(jboolean, Unsafe_CompareAndSwapObject(JNIEnv *env, jobject unsafe, jobject obj, jlong offset, jobject e_h, jobject x_h))
   UnsafeWrapper("Unsafe_CompareAndSwapObject");
-  oop x = JNIHandles::resolve(x_h);
-  oop e = JNIHandles::resolve(e_h);
-  oop p = JNIHandles::resolve(obj);
-  HeapWord* addr = (HeapWord *)index_oop_from_field_offset_long(p, offset);
+  oop x = JNIHandles::resolve(x_h); // 新对象值转换为oop类型
+  oop e = JNIHandles::resolve(e_h); // 旧对象值转换为oop类型
+  oop p = JNIHandles::resolve(obj); // 将Unsafe操作的目标对象转换为oop类型
+  HeapWord* addr = (HeapWord *)index_oop_from_field_offset_long(p, offset); // p的地址加上field_offset偏移量
   oop res = oopDesc::atomic_compare_exchange_oop(x, addr, e, true);
-  jboolean success  = (res == e);
-  if (success)
+  jboolean success  = (res == e); // 操作结果是否等于旧值
+  if (success) // 如果成功，则更新屏障标志？
     update_barrier_set((void*)addr, x);
   return success;
 UNSAFE_END

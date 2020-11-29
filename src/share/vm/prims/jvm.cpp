@@ -295,7 +295,7 @@ JVM_END
 
 JVM_LEAF(jlong, JVM_CurrentTimeMillis(JNIEnv *env, jclass ignored))
   JVMWrapper("JVM_CurrentTimeMillis");
-  return os::javaTimeMillis();
+  return os::javaTimeMillis(); // linux实现：hotspot\src\os\linux\vm\os_linux.cpp，底层调用gettimeofday()方法
 JVM_END
 
 JVM_LEAF(jlong, JVM_NanoTime(JNIEnv *env, jclass ignored))

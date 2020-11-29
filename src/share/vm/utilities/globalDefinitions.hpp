@@ -310,7 +310,7 @@ inline address_word  castable_address(void* x)                { return address_w
 inline size_t pointer_delta(const void* left,
                             const void* right,
                             size_t element_size) {
-  return (((uintptr_t) left) - ((uintptr_t) right)) / element_size;
+  return (((uintptr_t) left) - ((uintptr_t) right)) / element_size; // (left - right) / element_size
 }
 // A version specialized for HeapWord*'s.
 inline size_t pointer_delta(const HeapWord* left, const HeapWord* right) {

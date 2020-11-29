@@ -52,9 +52,10 @@ jbyte Atomic::cmpxchg(jbyte exchange_value, volatile jbyte* dest, jbyte compare_
   jint new_val = cur;
   jbyte* new_val_as_bytes = (jbyte*)(&new_val);
   new_val_as_bytes[offset] = exchange_value;
+  // 自旋处理，直到替换了旧值才退出
   while (cur_as_bytes[offset] == compare_value) {
     jint res = cmpxchg(new_val, dest_int, cur);
-    if (res == cur) break;
+    if (res == cur) break; // CAS新值替换旧值成功
     cur = res;
     new_val = cur;
     new_val_as_bytes[offset] = exchange_value;

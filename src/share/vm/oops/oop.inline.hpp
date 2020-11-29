@@ -64,7 +64,7 @@
 inline void oopDesc::release_set_mark(markOop m) {
   OrderAccess::release_store_ptr(&_mark, m);
 }
-
+// 对象头内联函数，设置mark word
 inline markOop oopDesc::cas_set_mark(markOop new_mark, markOop old_mark) {
   return (markOop) Atomic::cmpxchg_ptr(new_mark, &_mark, old_mark);
 }
@@ -189,18 +189,19 @@ inline bool check_obj_alignment(oop obj) {
   return cast_from_oop<intptr_t>(obj) % MinObjAlignmentInBytes == 0;
 }
 
+// 将oop转换为narrowOop类型
 inline narrowOop oopDesc::encode_heap_oop_not_null(oop v) {
   assert(!is_null(v), "oop value can never be zero");
   assert(check_obj_alignment(v), "Address not aligned");
   assert(Universe::heap()->is_in_reserved(v), "Address not in heap");
-  address base = Universe::narrow_oop_base();
-  int    shift = Universe::narrow_oop_shift();
-  uint64_t  pd = (uint64_t)(pointer_delta((void*)v, (void*)base, 1));
+  address base = Universe::narrow_oop_base(); // 在Java对象内部oop的实现的基址
+  int    shift = Universe::narrow_oop_shift(); // 编码/解码窄化指针时，需要执行位移的位数
+  uint64_t  pd = (uint64_t)(pointer_delta((void*)v, (void*)base, 1)); // 简单理解：(v-base)/1
   assert(OopEncodingHeapMax > pd, "change encoding max if new encoding");
-  uint64_t result = pd >> shift;
+  uint64_t result = pd >> shift; // 向右移位shift位. 例如64位机器向右移动3位
   assert((result & CONST64(0xffffffff00000000)) == 0, "narrow oop overflow");
   assert(decode_heap_oop(result) == v, "reversibility");
-  return (narrowOop)result;
+  return (narrowOop)result; // 转化为narrowOop类型
 }
 
 inline narrowOop oopDesc::encode_heap_oop(oop v) {
@@ -537,22 +538,24 @@ inline void oop_store_raw(HeapWord* addr, oop value) {
   }
 }
 
-inline oop oopDesc::atomic_compare_exchange_oop(oop exchange_value,
-                                                volatile HeapWord *dest,
-                                                oop compare_value,
-                                                bool prebarrier) {
+inline oop oopDesc::atomic_compare_exchange_oop(oop exchange_value, // 新值
+                                                volatile HeapWord *dest, // 目标对象的地址
+                                                oop compare_value, // 旧值
+                                                bool prebarrier) { // 预屏障？
+  // 如果启用了压缩指针
   if (UseCompressedOops) {
     if (prebarrier) {
       update_barrier_set_pre((narrowOop*)dest, exchange_value);
     }
-    // encode exchange and compare value from oop to T
-    narrowOop val = encode_heap_oop(exchange_value);
-    narrowOop cmp = encode_heap_oop(compare_value);
+    // encode exchange and compare value from oop to T. 转为压缩指针
+    narrowOop val = encode_heap_oop(exchange_value); // 新值. 转化为压缩指针
+    narrowOop cmp = encode_heap_oop(compare_value); // 旧值. 转化为压缩指针
 
     narrowOop old = (narrowOop) Atomic::cmpxchg(val, (narrowOop*)dest, cmp);
-    // decode old from T to oop
+    // decode old from T to oop. 解码压缩指针为普通指针
     return decode_heap_oop(old);
   } else {
+  // 没有启用了压缩指针
     if (prebarrier) {
       update_barrier_set_pre((oop*)dest, exchange_value);
     }

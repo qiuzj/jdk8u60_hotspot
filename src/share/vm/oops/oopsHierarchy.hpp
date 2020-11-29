@@ -28,13 +28,14 @@
 #include "runtime/globals.hpp"
 #include "utilities/globalDefinitions.hpp"
 
-// OBJECT hierarchy
+// OBJECT hierarchy. 对象层次结构
 // This hierarchy is a representation hierarchy, i.e. if A is a superclass
 // of B, A's representation is a prefix of B's representation.
+// 层次结构，是一个表示形式的层次结构？例如，如果A是B的超类，那么 A的表示形式 是 B的表示形式 的前缀？
 
-typedef juint narrowOop; // Offset instead of address for an oop within a java object
+typedef juint narrowOop; // Offset instead of address for an oop within a java object. java对象中oop的偏移量而不是地址
 
-// If compressed klass pointers then use narrowKlass.
+// If compressed klass pointers then use narrowKlass. 如果压缩klass指针，则使用narrowKlass
 typedef juint  narrowKlass;
 
 typedef void* OopOrNarrowOopStar;
@@ -54,6 +55,8 @@ typedef class     typeArrayOopDesc*            typeArrayOop;
 // carefully chosen set of constructors and conversion operators to go
 // to and from the underlying oopDesc pointer type.
 //
+// 当定义了CHECK_UNHANDLED_OOPS时，“oop”是一个带有一组精心选择的构造函数和转换操作符的类，用于与底层oopDesc指针类型进行转换。
+//
 // Because oop and its subclasses <type>Oop are class types, arbitrary
 // conversions are not accepted by the compiler.  Applying a cast to
 // an oop will cause the best matched conversion operator to be
@@ -64,10 +67,19 @@ typedef class     typeArrayOopDesc*            typeArrayOop;
 // ambiguity between operators of numerical and pointer types. If
 // a conversion to or from an oop to a numerical type is needed,
 // use the inline template methods, cast_*_oop, defined below.
+// 
+// 因为oop及其子类 <type>Oop 是类类型，所以编译器不接受任意转换。
+// 对oop进行类型转换，将导致调用最匹配的转换操作符，如果合适的话返回底层的oopDesc*类型。
+// 不应该在oop类中定义：复制构造函数、显式用户转换或数值类型的运算符。
+// 对于大多数的C++编译器，如果遇到数字和指针类型的运算符之间出现重载歧义，那么将会产生编译时错误。
+// 如果需要进行oop和数值类型之间的互相转换，请使用下面定义的内联模板方法 cast_*_oop。
 //
 // Converting NULL to oop to Handle implicit is no longer accepted by the
 // compiler because there are too many steps in the conversion.  Use Handle()
 // instead, which generates less code anyway.
+//
+// 编译器不再接受将NULL转换为oop来进行隐式处理，因为在转换中需要太多步骤。
+// 使用Handle()方法替代，这样可以生成更少的代码。
 
 class Thread;
 class PromotedObject;

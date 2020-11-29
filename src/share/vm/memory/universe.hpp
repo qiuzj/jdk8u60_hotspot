@@ -75,13 +75,13 @@ class LatestMethodCache : public CHeapObj<mtClass> {
 };
 
 
-// For UseCompressedOops.
+// For UseCompressedOops. 用于压缩指针
 struct NarrowPtrStruct {
-  // Base address for oop-within-java-object materialization.
-  // NULL if using wide oops or zero based narrow oops.
+  // Base address for oop-within-java-object materialization. 在Java对象内部oop的实现的基址
+  // NULL if using wide oops or zero based narrow oops. 如果使用了宽oops或零基窄址oops，则值为NULL
   address _base;
-  // Number of shift bits for encoding/decoding narrow ptrs.
-  // 0 if using wide ptrs or zero based unscaled narrow ptrs,
+  // Number of shift bits for encoding/decoding narrow ptrs. 编码/解码窄化指针时，需要执行位移的位数
+  // 0 if using wide ptrs or zero based unscaled narrow ptrs, 如果使用了宽指针或零基无缩放窄指针，则值为0
   // LogMinObjAlignmentInBytes/LogKlassAlignmentInBytes otherwise.
   int     _shift;
   // Generate code with implicit null checks for narrow ptrs.
@@ -361,8 +361,10 @@ class Universe: AllStatic {
   static const char* narrow_oop_mode_to_string(NARROW_OOP_MODE mode);
   static char*    preferred_heap_base(size_t heap_size, size_t alignment, NARROW_OOP_MODE mode);
   static char*    preferred_metaspace_base(size_t heap_size, NARROW_OOP_MODE mode);
+  // 在Java对象内部oop的实现的基址
   static address  narrow_oop_base()                       { return  _narrow_oop._base; }
   static bool  is_narrow_oop_base(void* addr)             { return (narrow_oop_base() == (address)addr); }
+  // 编码/解码窄化指针时，需要执行位移的位数
   static int      narrow_oop_shift()                      { return  _narrow_oop._shift; }
   static bool     narrow_oop_use_implicit_null_checks()   { return  _narrow_oop._use_implicit_null_checks; }
 

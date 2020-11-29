@@ -99,7 +99,7 @@ class Handle VALUE_OBJ_CLASS_SPEC {
   static oop raw_resolve(oop *handle)            { return handle == NULL ? (oop)NULL : *handle; }
 };
 
-// Specific Handles for different oop types
+// Specific Handles for different oop types. 针对不同oop类型的特定句柄
 #define DEF_HANDLE(type, is_a)                   \
   class type##Handle: public Handle {            \
    protected:                                    \

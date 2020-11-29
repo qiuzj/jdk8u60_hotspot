@@ -3275,7 +3275,7 @@ size_t      JavaThread::_stack_size_at_create = 0;
 bool        Threads::_vm_complete = false;
 #endif
 
-// All JavaThreads
+// All JavaThreads. 遍历Threads静态成员_thread_list
 #define ALL_JAVA_THREADS(X) for (JavaThread* X = _thread_list; X; X = X->next())
 
 // All JavaThreads + all non-JavaThreads (i.e., every thread in the system)

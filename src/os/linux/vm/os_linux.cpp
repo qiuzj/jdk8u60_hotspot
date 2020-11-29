@@ -1294,9 +1294,9 @@ double os::elapsedVTime() {
 
 jlong os::javaTimeMillis() {
   timeval time;
-  int status = gettimeofday(&time, NULL);
+  int status = gettimeofday(&time, NULL); // 获取时间. see：https://man7.org/linux/man-pages/man2/gettimeofday.2.html
   assert(status != -1, "linux error");
-  return jlong(time.tv_sec) * 1000  +  jlong(time.tv_usec / 1000);
+  return jlong(time.tv_sec) * 1000  +  jlong(time.tv_usec / 1000); // 秒数*1000 + 微秒数/1000 = 毫秒数
 }
 
 #ifndef CLOCK_MONOTONIC

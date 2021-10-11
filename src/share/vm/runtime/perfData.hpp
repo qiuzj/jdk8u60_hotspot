@@ -961,6 +961,7 @@ class PerfTraceTimedEvent : public PerfTraceTime {
   public:
     inline PerfTraceTimedEvent(PerfLongCounter* timerp, PerfLongCounter* eventp): PerfTraceTime(timerp), _eventp(eventp) {
       if (!UsePerfData) return;
+      // 自增1
       _eventp->inc();
     }
 

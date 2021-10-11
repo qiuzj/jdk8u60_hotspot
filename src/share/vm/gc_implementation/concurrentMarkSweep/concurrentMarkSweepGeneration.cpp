@@ -6635,9 +6635,14 @@ void CMSCollector::reset(bool asynch) {
   register_gc_end();
 }
 
+// HotSpot里每个stop-the-world行为都用一个VM_Operation包装起来。
+// 与CMS相关的两个VM_Operation就是VM_CMS_Initial_Mark与VM_CMS_Final_Mark。
+// 这两个VM_Operation的核心部分都调用了下面这个函数。
 void CMSCollector::do_CMS_operation(CMS_op_type op, GCCause::Cause gc_cause) {
   TraceCPUTime tcpu(PrintGCDetails, true, gclog_or_tty);
   GCTraceTime t(GCCauseString("GC", gc_cause), PrintGC, !PrintGCDetails, NULL, _gc_tracer_cm->gc_id());
+  // 这就让full GC的计数器增加了1。
+  // 也就是说CMS GC的两个暂停阶段各自会让Full GC计数器增加1，于是整个CMS并发GC周期里该计数器就会增加2了。
   TraceCollectorStats tcs(counters());
 
   switch (op) {

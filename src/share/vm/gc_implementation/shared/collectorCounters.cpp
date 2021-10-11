@@ -41,6 +41,7 @@ CollectorCounters::CollectorCounters(const char* name, int ordinal) {
     PerfDataManager::create_string_constant(SUN_GC, cname, name, CHECK);
 
     cname = PerfDataManager::counter_name(_name_space, "invocations");
+    // 记录GC次数
     _invocations = PerfDataManager::create_counter(SUN_GC, cname,
                                                    PerfData::U_Events, CHECK);
 

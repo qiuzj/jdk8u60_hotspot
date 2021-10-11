@@ -64,6 +64,7 @@ class CollectorCounters: public CHeapObj<mtGC> {
     const char* name_space() const                  { return _name_space; }
 };
 
+// 用于辅助记录GC的次数
 class TraceCollectorStats: public PerfTraceTimedEvent {
 
   protected:
@@ -71,7 +72,7 @@ class TraceCollectorStats: public PerfTraceTimedEvent {
 
   public:
     inline TraceCollectorStats(CollectorCounters* c) :
-           PerfTraceTimedEvent(c->time_counter(), c->invocation_counter()),
+           PerfTraceTimedEvent(c->time_counter(), c->invocation_counter()), // invocation_counter()计数器自增1
            _c(c) {
 
       if (UsePerfData) {

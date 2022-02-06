@@ -55,7 +55,7 @@
 #include "services/g1MemoryPool.hpp"
 #include "services/psMemoryPool.hpp"
 #endif // INCLUDE_ALL_GCS
-
+// 内存池列表
 GrowableArray<MemoryPool*>* MemoryService::_pools_list =
   new (ResourceObj::C_HEAP, mtInternal) GrowableArray<MemoryPool*>(init_pools_list_size, true);
 GrowableArray<MemoryManager*>* MemoryService::_managers_list =

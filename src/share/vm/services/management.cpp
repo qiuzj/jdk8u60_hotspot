@@ -812,42 +812,44 @@ JVM_END
 
 // Returns a java/lang/management/MemoryUsage object representing
 // the memory usage for the heap or non-heap memory.
+// 返回一个java/lang/management/MemoryUsage对象，表示堆或非堆内存的使用情况。
 JVM_ENTRY(jobject, jmm_GetMemoryUsage(JNIEnv* env, jboolean heap))
   ResourceMark rm(THREAD);
 
-  // Calculate the memory usage
-  size_t total_init = 0;
-  size_t total_used = 0;
-  size_t total_committed = 0;
-  size_t total_max = 0;
-  bool   has_undefined_init_size = false;
-  bool   has_undefined_max_size = false;
-
+  // Calculate the memory usage. 计算内存的使用量
+  size_t total_init = 0; // 总的初始化内存
+  size_t total_used = 0; // 总的已使用内存
+  size_t total_committed = 0; // 总的已提交内存
+  size_t total_max = 0; // 总的最大内存大小
+  bool   has_undefined_init_size = false; // 是否定义了初始化内存大小
+  bool   has_undefined_max_size = false; // 是否定义了最大内存大小
+  // 遍历所有内存池，计算已使用内存、已提交内存、最大内存、初始化内存
   for (int i = 0; i < MemoryService::num_memory_pools(); i++) {
     MemoryPool* pool = MemoryService::get_memory_pool(i);
     if ((heap && pool->is_heap()) || (!heap && pool->is_non_heap())) {
       MemoryUsage u = pool->get_memory_usage();
-      total_used += u.used();
-      total_committed += u.committed();
+      total_used += u.used(); // 计算已使用内存
+      total_committed += u.committed(); // 计算已提交内存
 
       if (u.init_size() == (size_t)-1) {
-        has_undefined_init_size = true;
+        has_undefined_init_size = true; // 未定义初始化内存大小. 一旦为true，永远为true，不同的内存池的值应该都是一样的
       }
       if (!has_undefined_init_size) {
-        total_init += u.init_size();
+        total_init += u.init_size(); // 计算初始化内存
       }
 
       if (u.max_size() == (size_t)-1) {
-        has_undefined_max_size = true;
+        has_undefined_max_size = true; // 未定义最大内存大小
       }
       if (!has_undefined_max_size) {
-        total_max += u.max_size();
+        total_max += u.max_size(); // 计算最大内存
       }
     }
   }
 
   // if any one of the memory pool has undefined init_size or max_size,
   // set it to -1
+  // 如果任何一个内存池的初始化大小或最大大小未定义，则设置为-1
   if (has_undefined_init_size) {
     total_init = (size_t)-1;
   }

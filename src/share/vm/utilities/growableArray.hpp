@@ -154,7 +154,7 @@ template<class E> class GrowableArray : public GenericGrowableArray {
   friend class VMStructs;
 
  private:
-  E*     _data;         // data array
+  E*     _data;         // data array. 存放数据的数组
 
   void grow(int j);
   void raw_at_put_grow(int i, const E& p, const E& fill);
@@ -220,7 +220,7 @@ template<class E> class GrowableArray : public GenericGrowableArray {
     if (missed) append(elem);
     return missed;
   }
-
+  // 根据索引号获取数据
   E& at(int i) {
     assert(0 <= i && i < _len, "illegal index");
     return _data[i];

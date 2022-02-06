@@ -305,7 +305,7 @@ class MetaspaceObj {
 };
 
 // Base class for classes that constitute name spaces.
-
+// 构成名字空间的类的基类
 class AllStatic {
  public:
   AllStatic()  { ShouldNotCallThis(); }

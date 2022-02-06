@@ -41,6 +41,10 @@
 // A memory pool can belong to the heap or the non-heap memory.
 // A Java virtual machine may also have memory pools belonging to
 // both heap and non-heap memory.
+// 内存池表示虚拟机管理的内存区域。
+// Java虚拟机至少有一个内存池，它可以在执行期间创建或删除内存池。
+// 内存池可以属于堆内存，也可以属于非堆内存。
+// Java虚拟机还可以拥有既属于堆内存又属于非堆内存的内存池。
 
 // Forward declaration
 class MemoryManager;
@@ -48,13 +52,13 @@ class SensorInfo;
 class Generation;
 class DefNewGeneration;
 class ThresholdSupport;
-
+// 内存池
 class MemoryPool : public CHeapObj<mtInternal> {
   friend class MemoryManager;
  public:
   enum PoolType {
-    Heap    = 1,
-    NonHeap = 2
+    Heap    = 1, // 堆
+    NonHeap = 2 // 非堆
   };
 
  private:
@@ -65,14 +69,14 @@ class MemoryPool : public CHeapObj<mtInternal> {
   // We could make some of the following as performance counters
   // for external monitoring.
   const char*      _name;
-  PoolType         _type;
+  PoolType         _type; // 是否为堆内存
   size_t           _initial_size;
   size_t           _max_size;
   bool             _available_for_allocation; // Default is true
   MemoryManager*   _managers[max_num_managers];
   int              _num_managers;
-  MemoryUsage      _peak_usage;               // Peak memory usage
-  MemoryUsage      _after_gc_usage;           // After GC memory usage
+  MemoryUsage      _peak_usage;               // Peak memory usage. 峰值内存使用量
+  MemoryUsage      _after_gc_usage;           // After GC memory usage. GC之后的内存使用量
 
   ThresholdSupport* _usage_threshold;
   ThresholdSupport* _gc_usage_threshold;

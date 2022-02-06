@@ -48,11 +48,11 @@ class ParallelScavengeHeap;
 class G1CollectedHeap;
 
 // VM Monitoring and Management Support
-
+// 虚拟机监控和管理支持
 class MemoryService : public AllStatic {
 private:
   enum {
-    init_pools_list_size = 10,
+    init_pools_list_size = 10, // 初始化的内存池列表大小
     init_managers_list_size = 5
   };
 
@@ -135,7 +135,7 @@ public:
   static const int num_memory_managers() {
     return _managers_list->length();
   }
-
+  // 根据索引号获取内存池
   static MemoryPool* get_memory_pool(int index) {
     return _pools_list->at(index);
   }
